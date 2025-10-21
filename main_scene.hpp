@@ -8,6 +8,7 @@
 #include <physics/physics_engine.hpp>
 #include <core/event/event_bus.hpp>
 #include <core/event/types.hpp>
+#include "editor_panels.hpp"
 
 /**
  * @name main_scene
@@ -20,7 +21,10 @@ class main_scene : public atlas::scene_scope {
 public:
     main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus);
 
-    ~main_scene()  = default;
+    ~main_scene() {
+        // m_testing_sound_source.stop();
+        // m_testing_sound_source.cleanup();
+    }
 
 
     void start_game();
@@ -39,6 +43,8 @@ public:
 
     void collision_enter(atlas::event::collision_enter& p_event);
 
+    void collision_persisted(atlas::event::collision_persisted& p_event);
+
 
 private:
     // TODO: Will implement scene management system to coordinate with physics system
@@ -51,6 +57,7 @@ private:
     void reset_objects();
 
 private:
+    atlas::serializer m_deserializer_test;
     atlas::optional_ref<atlas::scene_object> m_viking_room;
     atlas::optional_ref<atlas::scene_object> m_platform;
     
@@ -60,8 +67,11 @@ private:
     atlas::optional_ref<atlas::scene_object> m_camera;
     atlas::physics::physics_engine m_physics_engine_handler;
 
+    editor_panel m_panels;
+
     bool m_blink_text=false;
     glm::vec3 m_offset_from_camera;
 
     bool m_physics_is_runtime=false;
+
 };

@@ -31,6 +31,7 @@ class StarterConanRecipe(ConanFile):
         self.requires("vulkan-cpp/1.0")
         self.requires("glm/1.0.1")
         self.requires("atlas/0.2")
+        self.requires("miniaudio/1.0")
 
     def build(self):
         cmake = CMake(self)
