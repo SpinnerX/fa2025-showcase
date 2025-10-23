@@ -166,19 +166,8 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
 }
 
 void main_scene::reset_objects() {
-
-    // m_sphere->set<atlas::transform>({
-    //     .position = {-2.70f, 2.70, -8.30f},
-    //     .scale{1.f}
-    // });
-
-    // glm::vec3 sphere_scale{5.f};
-    // m_sphere->set<atlas::transform>({
-    //     .position = {-2.70f, 2.70, -8.30f},
-    //     .rotation = {2.30f, 95.90f, 91.80f},
-    //     .scale = sphere_scale,
-    // });
     
+    // When we reload the simulation we load in all objects correlated to that particular scene
     m_deserializer_test = atlas::serializer();
     if(!m_deserializer_test.load("LevelScene", *this)) {
         console_log_error("Cannot load LevelScene!!!");
