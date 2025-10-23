@@ -1,27 +1,25 @@
 Scene: LevelScene
 Entities:
-  - Entity: Viking Room Object
+  - Entity: camera
     Transform:
-      Position: [7.19999981, 31, -1.70000005]
-      Scale: [6, 6, 6]
-      Rotation: [0, 0, 0]
-      Quaternion: [0, 0, 0, 1]
-    Material:
-      Model Path: assets/models/viking_room.obj
-      Texture Path: assets/models/viking_room.png
-    Physics Body:
-      Linear Velocity: [0, 0, 0]
-      Angular Velocity: [0, 0, 0]
-      Cumulative Force: [0, 0, 0]
-      Cumulative Torque: [0, 0, 0]
-      Mass Factor: 1
-      Center Mass Position: [7.19999981, 31, -1.70000005]
-      Friction: 0.800000012
-      Restitution: 0.200000003
-      Body Movement Type: 0
-      Body Layer Type: 1
-    Box Collider:
-      Half Extent: [6, 6, 6]
+      Position: [2.16781712, 33.758831, -151.954544]
+      Scale: [1, 1, 1]
+      Rotation: [-0.200000003, 3.07380652, 0]
+      Quaternion: [-0.00338301272, 0.994432747, 0.0997760892, 0.0337172821]
+    PerspectiveCamera:
+      Plane: [0.100000001, 5000]
+      Active: true
+      Field of View: 47.0999985
+  - Entity: game camera
+    Transform:
+      Position: [-3.47544098, 10.3000154, -28.8755264]
+      Scale: [1, 1, 1]
+      Rotation: [0.63575995, -3.13621259, 0]
+      Quaternion: [0.000840778113, -0.949896693, 0.312552333, 0.00255525974]
+    PerspectiveCamera:
+      Plane: [0.100000001, 5000]
+      Active: false
+      Field of View: 45
   - Entity: Platform
     Transform:
       Position: [0, 0, 0]
@@ -44,3 +42,91 @@ Entities:
       Body Layer Type: 1
     Box Collider:
       Half Extent: [125, 0.300000012, 125]
+  - Entity: Border 1
+    Transform:
+      Position: [29.8999996, 9, 1]
+      Scale: [1, 8.39999962, 84.1999969]
+      Rotation: [0, 0, 0]
+      Quaternion: [0, 0, 0, 1]
+    Material:
+      Model Path: assets/models/cube.obj
+      Texture Path: assets/models/wood.png
+    Physics Body:
+      Linear Velocity: [0, 0, 0]
+      Angular Velocity: [0, 0, 0]
+      Cumulative Force: [0, 0, 0]
+      Cumulative Torque: [0, 0, 0]
+      Mass Factor: 1
+      Center Mass Position: [29.8999996, 9, 1]
+      Friction: 0.800000012
+      Restitution: 0.200000003
+      Body Movement Type: 0
+      Body Layer Type: 1
+    Box Collider:
+      Half Extent: [1, 8.39999962, 84.1999969]
+  - Entity: Border 2
+    Transform:
+      Position: [-30.2000008, 8.80000019, 0]
+      Scale: [1, 8.39999962, 84.1999969]
+      Rotation: [0, 0, 0]
+      Quaternion: [0, 0, 0, 1]
+    Material:
+      Model Path: assets/models/cube.obj
+      Texture Path: assets/models/wood.png
+    Physics Body:
+      Linear Velocity: [0, 0, 0]
+      Angular Velocity: [0, 0, 0]
+      Cumulative Force: [0, 0, 0]
+      Cumulative Torque: [0, 0, 0]
+      Mass Factor: 1
+      Center Mass Position: [-30.2000008, 8.80000019, 0]
+      Friction: 0.800000012
+      Restitution: 0.200000003
+      Body Movement Type: 0
+      Body Layer Type: 1
+    Box Collider:
+      Half Extent: [1, 8.39999962, 84.1999969]
+  - Entity: Cube
+    Transform:
+      Position: [-2.13000011, 3.29999995, 24.6499996]
+      Scale: [3, 3, 3]
+      Rotation: [-1.57079673, -0.718684316, 3.14159274]
+      Quaternion: [0.248660073, -0.66194278, 0.661942661, 0.248660117]
+    Material:
+      Model Path: assets/models/cube.obj
+      Texture Path: assets/models/Tiles074_8K-JPG_Color.jpg
+    Physics Body:
+      Linear Velocity: [1.02496699e-10, -8.83031755e-12, -2.81727114e-10]
+      Angular Velocity: [-9.37461636e-11, 2.11183827e-13, -3.43346462e-11]
+      Cumulative Force: [0, 0, 0]
+      Cumulative Torque: [0, 0, 0]
+      Mass Factor: 1
+      Center Mass Position: [0.627623916, 3.29999828, 52.859726]
+      Friction: 95
+      Restitution: 0.200000003
+      Body Movement Type: 2
+      Body Layer Type: 1
+    Box Collider:
+      Half Extent: [3, 3, 3]
+  - Entity: Sphere
+    Transform:
+      Position: [-2.70000005, 5.9000001, -52.5999985]
+      Scale: [5, 5, 5]
+      Rotation: [2.29999995, 95.9000015, 91.8000031]
+      Quaternion: [0, 0, 0, 1]
+    Material:
+      Model Path: assets/models/Ball OBJ.obj
+      Texture Path: assets/models/clear.png
+    Physics Body:
+      Linear Velocity: [-0.397364259, -23.2499256, 38.3189011]
+      Angular Velocity: [-1, 0, 0]
+      Cumulative Force: [24320, 24320, 24320]
+      Cumulative Torque: [0, 0, 0]
+      Mass Factor: 1
+      Center Mass Position: [7.093678, -24.8157997, 228.421432]
+      Friction: 100
+      Restitution: 0.200000003
+      Body Movement Type: 2
+      Body Layer Type: 1
+    Sphere Collider:
+      Radius: 5
