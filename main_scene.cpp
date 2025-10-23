@@ -154,6 +154,7 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
     // subscription example
     subscribe<atlas::event::collision_enter>(this, &main_scene::collision_enter);
     subscribe<atlas::event::collision_persisted>(this, &main_scene::collision_persisted);
+    subscribe<atlas::event::collision_exit>(this, &main_scene::collision_removed);
 
 
     // game state behavior
@@ -194,32 +195,6 @@ void edit_transform(atlas::transform* p_transform) {
     atlas::ui::draw_vec3("Rotation", p_transform->rotation);
 }
 
-void play_sound(ma_engine* pEngine, const std::string& filename) {
-    if (!pEngine) {
-        return;
-    }
-
-    ma_result result;
-    ma_sound sound;
-
-    result = ma_sound_init_from_file(pEngine, filename.c_str(), 0, nullptr, nullptr, &sound);
-    if (result != MA_SUCCESS) {
-        return;
-    }
-
-    result = ma_sound_start(&sound);
-    if (result != MA_SUCCESS) {
-        ma_sound_uninit(&sound);
-        return;
-    }
-
-    while (ma_sound_is_playing(&sound)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-
-    ma_sound_uninit(&sound);
-}
-
 void main_scene::collision_enter(atlas::event::collision_enter& p_event) {
     // console_log_warn("Collision Enter happened!!! Executed from main_scene::collision_enter"); 
     // console_log_info("main_scene::collision_enter happened!");
@@ -235,28 +210,56 @@ void main_scene::collision_enter(atlas::event::collision_enter& p_event) {
 void main_scene::collision_persisted(atlas::event::collision_persisted& p_event) {
     flecs::world registry = *this;
     
+    // Something TODO -- Is having ways to distinguish and only give you specific entities you want collision_persisted to give you
+    // Rather then having to do these state-checks
     flecs::entity e1 = registry.entity(p_event.entity1);
     flecs::entity e2 = registry.entity(p_event.entity2);
 
-    if(e2.name() == "Sphere") {
+    if(e1.name() == "Sphere" || e2.name() == "Sphere") {
         // This will only ever play the audio whenever the ball has made contact with the platform
-        /*
-        std::string sound_file = "Resources/rolling_ball_on_wood.mp3";
-        // if(!m_is_audio_playing.load()) {
-        std::lock_guard<std::mutex> lock(m_audio_mutex);
-        m_is_audio_playing = true;
+        
+        std::string sound_file = "Resources/ball-in-hole-99750.mp3";
 
-        // We create a separate thread that runs in the background
-        m_audio_thread = std::thread([this, sound_file](){
-            play_sound(&m_audio_engine, sound_file);
-            m_is_audio_playing=false;
-        });
+        console_log_warn("m_is_audio_playing.load() = {}", m_is_audio_playing.load());
+        if(!m_is_audio_playing.load()) {
+            std::lock_guard<std::mutex> lock(m_audio_mutex);
+            m_is_audio_playing = true;
+            m_stop_audio_thread = false;
 
-        // we detach this audio thread from the game-thread (main) to play in the background
-        m_audio_thread.detach();
-        // }
-        */
+            console_log_info("Starting audio thread!!");
+
+            // We create a separate thread that runs in the background
+            m_audio_thread = std::thread([this, sound_file](){
+
+                ma_result result;
+                ma_sound sound;
+
+                result = ma_sound_init_from_file(&m_audio_engine, sound_file.c_str(), 0, nullptr, nullptr, &sound);
+                if (result != MA_SUCCESS) {
+                    return;
+                }
+
+                result = ma_sound_start(&sound);
+                if (result != MA_SUCCESS) {
+                    ma_sound_uninit(&sound);
+                    return;
+                }
+
+                while (ma_sound_is_playing(&sound) and !m_stop_audio_thread.load()) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+
+                ma_sound_uninit(&sound);
+            });
+
+            // we detach this audio thread from the game-thread (main) to play in the background
+            m_audio_thread.detach();
+        }
     }
+}
+
+void main_scene::collision_removed(atlas::event::collision_exit& p_event) {
+    console_log_info("collision_exit called!!!");
 }
 
 void main_scene::start_game() {
@@ -281,19 +284,29 @@ void main_scene::start_game() {
 }
 
 void main_scene::runtime_start() {
-    // runs the physics simulation
+    // Make sure we can run the simulation
+    // This will get replaced by a play button in the editor panel
     m_physics_is_runtime = true;
 
     m_physics_engine_handler.start();
 }
 
 void main_scene::runtime_stop() {
-    // stops the physics simulation
-    // also does post-cleanup
     m_physics_is_runtime = false;
+    m_stop_audio_thread = true;
+    m_is_audio_playing = false;
 
     m_physics_engine_handler.stop();
 
+
+    // resetting audio
+    // when stopping simulation
+    if(m_stop_audio_thread.load()) {
+        if(m_audio_thread.joinable()) {
+            console_log_warn("Joining audio thread!!");
+            m_audio_thread.join();
+        }
+    }
     reset_objects();
 }
 
@@ -430,7 +443,7 @@ main_scene::on_physics_update() {
             float pitch = glm::asin(-direction.y);
             
             game_camera_transform->rotation = {pitch, yaw, 0.f};
-            game_camera_transform->set_rotation(game_camera_transform->rotation);
+            // game_camera_transform->set_rotation(game_camera_transform->rotation);
             // float camera_follow_speed = 3.f;
             // game_camera_transform->position = glm::mix(
             //     game_camera_transform->position, 
