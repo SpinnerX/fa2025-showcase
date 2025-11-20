@@ -12,28 +12,30 @@ Entities:
       Field of View: 47.0999985
   - Entity: game camera
     Transform:
-      Position: [-3.47544098, 10.3000154, -28.8755264]
+      Position: [0.0777579844, 5.79998875, -17.5399818]
       Scale: [1, 1, 1]
       Rotation: [0.63575995, -3.13621259, 0]
       Quaternion: [0.000840778113, -0.949896693, 0.312552333, 0.00255525974]
     PerspectiveCamera:
       Plane: [0.100000001, 5000]
       Active: false
-      Field of View: 45
+      Field of View: 116
   - Entity: Platform
     Transform:
       Position: [0, 0, 0]
       Scale: [125, 0.300000012, 125]
       Rotation: [0, 0, 0]
       Quaternion: [0, 0, 0, 1]
-    Material:
+    Mesh Source:
       Model Path: assets/models/cube.obj
-      Texture Path: assets/models/wood.png
+      Diffuse: assets/models/wood.png
+      Specular: ""
     Physics Body:
       Linear Velocity: [0, 0, 0]
       Angular Velocity: [0, 0, 0]
-      Cumulative Force: [0, 0, 0]
-      Cumulative Torque: [0, 0, 0]
+      Force: [0, 0, 0]
+      Impulse: [0, 0, 0]
+      Torque: [0, 0, 0]
       Mass Factor: 1
       Center Mass Position: [0, 0, 0]
       Friction: 0.800000012
@@ -48,14 +50,16 @@ Entities:
       Scale: [1, 8.39999962, 84.1999969]
       Rotation: [0, 0, 0]
       Quaternion: [0, 0, 0, 1]
-    Material:
+    Mesh Source:
       Model Path: assets/models/cube.obj
-      Texture Path: assets/models/wood.png
+      Diffuse: assets/models/wood.png
+      Specular: ""
     Physics Body:
       Linear Velocity: [0, 0, 0]
       Angular Velocity: [0, 0, 0]
-      Cumulative Force: [0, 0, 0]
-      Cumulative Torque: [0, 0, 0]
+      Force: [0, 0, 0]
+      Impulse: [0, 0, 0]
+      Torque: [0, 0, 0]
       Mass Factor: 1
       Center Mass Position: [29.8999996, 9, 1]
       Friction: 0.800000012
@@ -70,14 +74,16 @@ Entities:
       Scale: [1, 8.39999962, 84.1999969]
       Rotation: [0, 0, 0]
       Quaternion: [0, 0, 0, 1]
-    Material:
+    Mesh Source:
       Model Path: assets/models/cube.obj
-      Texture Path: assets/models/wood.png
+      Diffuse: assets/models/wood.png
+      Specular: ""
     Physics Body:
       Linear Velocity: [0, 0, 0]
       Angular Velocity: [0, 0, 0]
-      Cumulative Force: [0, 0, 0]
-      Cumulative Torque: [0, 0, 0]
+      Force: [0, 0, 0]
+      Impulse: [0, 0, 0]
+      Torque: [0, 0, 0]
       Mass Factor: 1
       Center Mass Position: [-30.2000008, 8.80000019, 0]
       Friction: 0.800000012
@@ -88,20 +94,22 @@ Entities:
       Half Extent: [1, 8.39999962, 84.1999969]
   - Entity: Cube
     Transform:
-      Position: [-2.13000011, 3.29999995, 24.6499996]
+      Position: [-2.13000035, 3.29999948, 24.6499996]
       Scale: [3, 3, 3]
       Rotation: [-1.57079673, -0.718684316, 3.14159274]
       Quaternion: [0.248660073, -0.66194278, 0.661942661, 0.248660117]
-    Material:
+    Mesh Source:
       Model Path: assets/models/cube.obj
-      Texture Path: assets/models/Tiles074_8K-JPG_Color.jpg
+      Diffuse: assets/models/Tiles074_8K-JPG_Color.jpg
+      Specular: ""
     Physics Body:
-      Linear Velocity: [1.02496699e-10, -8.83031755e-12, -2.81727114e-10]
-      Angular Velocity: [-9.37461636e-11, 2.11183827e-13, -3.43346462e-11]
-      Cumulative Force: [0, 0, 0]
-      Cumulative Torque: [0, 0, 0]
+      Linear Velocity: [3.64655361e-10, 6.64619304e-10, -8.62926008e-10]
+      Angular Velocity: [-2.87642049e-10, 1.83371003e-17, -1.21551783e-10]
+      Force: [0, 0, 0]
+      Impulse: [0, 0, 0]
+      Torque: [0, 0, 0]
       Mass Factor: 1
-      Center Mass Position: [0.627623916, 3.29999828, 52.859726]
+      Center Mass Position: [-2.13000035, 3.29999948, 24.6499996]
       Friction: 95
       Restitution: 0.200000003
       Body Movement Type: 2
@@ -110,20 +118,22 @@ Entities:
       Half Extent: [3, 3, 3]
   - Entity: Sphere
     Transform:
-      Position: [-2.70000005, 5.9000001, -52.5999985]
+      Position: [0.0777579695, 5.29998827, -27.5399799]
       Scale: [5, 5, 5]
-      Rotation: [2.29999995, 95.9000015, 91.8000031]
-      Quaternion: [0, 0, 0, 1]
-    Material:
+      Rotation: [-1.74964607, 0.126617521, 0.345879674]
+      Quaternion: [0.761447847, 0.0918369293, -0.157932833, -0.621948898]
+    Mesh Source:
       Model Path: assets/models/Ball OBJ.obj
-      Texture Path: assets/models/clear.png
+      Diffuse: assets/models/clear.png
+      Specular: ""
     Physics Body:
-      Linear Velocity: [-0.397364259, -23.2499256, 38.3189011]
+      Linear Velocity: [0.0688988939, -9.25326367e-06, 0.0332176648]
       Angular Velocity: [-1, 0, 0]
-      Cumulative Force: [24320, 24320, 24320]
-      Cumulative Torque: [0, 0, 0]
+      Force: [24320, 24320, 24320]
+      Impulse: [0, 0, 0]
+      Torque: [0, 0, 0]
       Mass Factor: 1
-      Center Mass Position: [7.093678, -24.8157997, 228.421432]
+      Center Mass Position: [0.0777579695, 5.29998827, -27.5399799]
       Friction: 100
       Restitution: 0.200000003
       Body Movement Type: 2

@@ -38,9 +38,9 @@ ui_component_list(flecs::entity& p_selected_entity) {
             }
         }
 
-        if (!p_selected_entity.has<atlas::material>()) {
-            if (ImGui::MenuItem("Material (Mesh Component)")) {
-                p_selected_entity.add<atlas::material>();
+        if (!p_selected_entity.has<atlas::mesh_source>()) {
+            if (ImGui::MenuItem("Mesh Source")) {
+                p_selected_entity.add<atlas::mesh_source>();
                 ImGui::CloseCurrentPopup();
             }
         }
@@ -184,8 +184,8 @@ void editor_panel::render_properties_panel() {
                   ImGui::Checkbox("is_active", &p_camera->is_active);
               });
 
-            atlas::ui::draw_component<atlas::material>(
-              "material", m_selected_entity, [](atlas::material* p_material) {
+            atlas::ui::draw_component<atlas::mesh_source>(
+              "Mesh Source", m_selected_entity, [](atlas::mesh_source* p_material) {
                   atlas::ui::draw_input_text(p_material->model_path);
                   atlas::ui::draw_vec4("Color", p_material->color);
               });
@@ -228,9 +228,9 @@ void editor_panel::render_properties_panel() {
                                        p_body->linear_velocity);
                   atlas::ui::draw_vec3("Angular Velocity",
                                        p_body->angular_velocity);
-                  atlas::ui::draw_vec3("Force", p_body->cumulative_force);
+                  atlas::ui::draw_vec3("Force", p_body->force);
                   atlas::ui::draw_float("Friction", p_body->friction);
-                  atlas::ui::draw_vec3("Torque", p_body->cumulative_torque);
+                  atlas::ui::draw_vec3("Torque", p_body->torque);
                   atlas::ui::draw_vec3("Center Mass",
                                        p_body->center_mass_position);
               });

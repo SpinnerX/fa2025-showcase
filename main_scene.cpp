@@ -50,10 +50,10 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
         .rotation = {0.10f, 1.55f, 7.96f},
         .scale{6.f},
     });
-    m_cube->set<atlas::material>({
+    m_cube->set<atlas::mesh_source>({
         .color = {0.f, 1.f, 0.f, 1.f}, // R, G, B, A
         .model_path = "assets/models/cube.obj",
-        .texture_path = "assets/models/Tiles074_8K-JPG_Color.jpg"
+        .diffuse = "assets/models/Tiles074_8K-JPG_Color.jpg"
     });
     m_cube->add<atlas::tag::serialize>();
 
@@ -65,10 +65,10 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
 
     m_platform->add<atlas::tag::serialize>();
 
-    m_platform->set<atlas::material>({
+    m_platform->set<atlas::mesh_source>({
         .color = {1.f, 1.f, 1.f, 1.f},
         .model_path = "assets/models/cube.obj",
-        .texture_path = "assets/models/wood.png"
+        .diffuse = "assets/models/wood.png"
     });
     
     m_platform->set<atlas::physics_body>({
@@ -86,10 +86,10 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
         .rotation = {2.30f, 95.90f, 91.80f},
         .scale = {1.f, 1.f, 1.f},
     });
-    m_sphere->set<atlas::material>({
+    m_sphere->set<atlas::mesh_source>({
         .color{1.f},
         .model_path = "assets/models/Ball OBJ.obj",
-        .texture_path = "assets/models/clear.png"
+        .diffuse = "assets/models/clear.png"
     });
 
     // Adding physics body
@@ -113,10 +113,10 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
 
     m_border1->add<atlas::tag::serialize>();
 
-    m_border1->set<atlas::material>({
+    m_border1->set<atlas::mesh_source>({
         .color = {1.f, 1.f, 1.f, 1.f},
         .model_path = "assets/models/cube.obj",
-        .texture_path = "assets/models/wood.png"
+        .diffuse = "assets/models/wood.png"
     });
     
     m_border1->set<atlas::physics_body>({
@@ -136,10 +136,10 @@ main_scene::main_scene(const std::string& p_tag, atlas::event::event_bus& p_bus)
 
     m_border2->add<atlas::tag::serialize>();
 
-    m_border2->set<atlas::material>({
+    m_border2->set<atlas::mesh_source>({
         .color = {1.f, 1.f, 1.f, 1.f},
         .model_path = "assets/models/cube.obj",
-        .texture_path = "assets/models/wood.png"
+        .diffuse = "assets/models/wood.png"
     });
     
     m_border2->set<atlas::physics_body>({
@@ -172,9 +172,6 @@ void main_scene::reset_objects() {
     if(!m_deserializer_test.load("LevelScene", *this)) {
         console_log_error("Cannot load LevelScene!!!");
     }
-
-
-
 }
 
 
@@ -207,15 +204,13 @@ void main_scene::collision_persisted(atlas::event::collision_persisted& p_event)
     if(e1.name() == "Sphere" || e2.name() == "Sphere") {
         // This will only ever play the audio whenever the ball has made contact with the platform
         
-        std::string sound_file = "Resources/ball-in-hole-99750.mp3";
+        // std::string sound_file = "Resources/ball-in-hole-99750.mp3";
+        std::string sound_file = "Resources/rolling-cart-002-86702.mp3";
 
-        console_log_warn("m_is_audio_playing.load() = {}", m_is_audio_playing.load());
         if(!m_is_audio_playing.load()) {
             std::lock_guard<std::mutex> lock(m_audio_mutex);
             m_is_audio_playing = true;
             m_stop_audio_thread = false;
-
-            console_log_info("Starting audio thread!!");
 
             // We create a separate thread that runs in the background
             m_audio_thread = std::thread([this, sound_file](){
@@ -309,51 +304,91 @@ main_scene::on_ui_update() {
 void
 main_scene::on_update() {
     float smooth_speed = 0.1f;
-    atlas::transform* camera_transform = m_camera->get_mut<atlas::transform>();
-    atlas::transform* sphere_transform = m_sphere->get_mut<atlas::transform>();
-
     float dt = atlas::application::delta_time();
+    atlas::physics_body* sphere_body = m_sphere->get_mut<atlas::physics_body>();
+    atlas::transform* cube_transform = m_cube->get_mut<atlas::transform>();
+    atlas::transform* sphere_transform = m_sphere->get_mut<atlas::transform>();
+    atlas::transform* editor_camera_transform = m_camera->get_mut<atlas::transform>();
+    atlas::perspective_camera* editor_camera = m_camera->get_mut<atlas::perspective_camera>();
+    atlas::perspective_camera* game_camera = m_runtime_camera->get_mut<atlas::perspective_camera>();
+    atlas::transform* game_camera_transform = m_runtime_camera->get_mut<atlas::transform>();
+
     float movement_speed = 10.f;
     float rotation_speed = 1.f;
     float velocity = movement_speed * dt;
     float rotation_velocity = rotation_speed * dt;
-    glm::quat quaternion = atlas::to_quat(camera_transform->quaternion);
+    glm::quat quaternion = atlas::to_quat(editor_camera_transform->quaternion);
     glm::vec3 up = glm::rotate(quaternion, glm::vec3(0.f, 1.f, 0.f));
     glm::vec3 forward = glm::rotate(quaternion, glm::vec3(0.f, 0.f, -1.f));
+    // glm::vec3 forward = atlas::math::forward_vector(); // forward_vector returns glm::vec3
     glm::vec3 right = glm::rotate(quaternion, glm::vec3(1.0f, 0.0f, 0.0f));
 
-    if (atlas::event::is_key_pressed(key_left_shift)) {
-        if (atlas::event::is_mouse_pressed(mouse_button_middle)) {
-            camera_transform->position += up * velocity;
+    // For now there should be only one camera active (unless we are doing multiplayer or local player like split screen, but not dealing with that yet)
+    if(editor_camera->is_active) {
+        if (atlas::event::is_key_pressed(key_left_shift)) {
+            if (atlas::event::is_mouse_pressed(mouse_button_middle)) {
+                editor_camera_transform->position += up * velocity;
+            }
+
+            if (atlas::event::is_mouse_pressed(mouse_button_right)) {
+                editor_camera_transform->position -= up * velocity;
+            }
         }
 
-        if (atlas::event::is_mouse_pressed(mouse_button_right)) {
-            camera_transform->position -= up * velocity;
+        if (atlas::event::is_key_pressed(key_w)) {
+            editor_camera_transform->position += forward * velocity;
         }
+        if (atlas::event::is_key_pressed(key_s)) {
+            editor_camera_transform->position -= forward * velocity;
+        }
+
+        if (atlas::event::is_key_pressed(key_d)) {
+            editor_camera_transform->position += right * velocity;
+        }
+        if (atlas::event::is_key_pressed(key_a)) {
+            editor_camera_transform->position -= right * velocity;
+        }
+
+        if (atlas::event::is_key_pressed(key_q)) {
+            editor_camera_transform->rotation.y += rotation_velocity;
+        }
+        if (atlas::event::is_key_pressed(key_e)) {
+            editor_camera_transform->rotation.y -= rotation_velocity;
+        }
+
+        editor_camera_transform->set_rotation(editor_camera_transform->rotation);
     }
 
-    if (atlas::event::is_key_pressed(key_w)) {
-        camera_transform->position += forward * velocity;
-    }
-    if (atlas::event::is_key_pressed(key_s)) {
-        camera_transform->position -= forward * velocity;
-    }
+    // Only do this if the runtime camera is active
+    if(game_camera->is_active) {
+        float camera_look_ahead_offset = 2.f;
+        glm::vec3 worldspace_offset = {0.f, 0.5f, 10.f};  // Offset from sphere
+        // Smooth camera movement
+        float follow_speed = 5.f;
 
-    if (atlas::event::is_key_pressed(key_d)) {
-        camera_transform->position += right * velocity;
-    }
-    if (atlas::event::is_key_pressed(key_a)) {
-        camera_transform->position -= right * velocity;
-    }
+        // // glm::vec3 target_position = sphere_transform->position + camera_offset;
+        // glm::vec3 look_ahead = sphere_transform->position + glm::normalize(sphere_body->linear_velocity) * camera_look_ahead_offset;
 
-    if (atlas::event::is_key_pressed(key_q)) {
-        camera_transform->rotation.y += rotation_velocity;
-    }
-    if (atlas::event::is_key_pressed(key_e)) {
-        camera_transform->rotation.y -= rotation_velocity;
-    }
+        // // Position camera behind sphere
+        // glm::vec3 camera_direction = glm::normalize(sphere_transform->position - look_ahead);
+        // glm::vec3 target_position = sphere_transform->position - camera_direction * glm::length(camera_offset);
+        // target_position.y += camera_offset.y;  // Keep height offset
 
-    camera_transform->set_rotation(camera_transform->rotation);
+        glm::vec3 target_position = sphere_transform->position + worldspace_offset;
+
+        game_camera_transform->position = glm::mix(
+            game_camera_transform->position, 
+            target_position, 
+            follow_speed * dt
+        );
+        
+        // Look at sphere
+        // glm::vec3 direction = glm::normalize(sphere_transform->position - game_camera_transform->position);
+        // float yaw = glm::atan(direction.x, direction.z);
+        // float pitch = glm::asin(-direction.y);
+        
+        // game_camera_transform->rotation = {pitch, yaw, 0.f};
+    }
 }
 
 void main_scene::respawn() {
@@ -404,49 +439,6 @@ main_scene::on_physics_update() {
                 respawn();
             }
         }
-
-
-        if(game_camera->is_active) {
-            float camera_look_ahead_offset = 2.f;
-            glm::vec3 camera_offset = {0.f, 5.f, 10.f};  // Offset from sphere
-
-            // glm::vec3 target_position = sphere_transform->position + camera_offset;
-            glm::vec3 look_ahead = sphere_transform->position + glm::normalize(sphere_body->linear_velocity) * camera_look_ahead_offset;
-    
-            // Position camera behind sphere
-            glm::vec3 camera_direction = glm::normalize(sphere_transform->position - look_ahead);
-            glm::vec3 target_position = sphere_transform->position - camera_direction * glm::length(camera_offset);
-            target_position.y += camera_offset.y;  // Keep height offset
-            
-            // Smooth camera movement
-            float follow_speed = 3.f;
-            game_camera_transform->position = glm::mix(
-                game_camera_transform->position, 
-                target_position, 
-                follow_speed * atlas::application::delta_time()
-            );
-            
-            // Look at sphere
-            glm::vec3 direction = glm::normalize(sphere_transform->position - game_camera_transform->position);
-            float yaw = glm::atan(direction.x, direction.z);
-            float pitch = glm::asin(-direction.y);
-            
-            game_camera_transform->rotation = {pitch, yaw, 0.f};
-            // game_camera_transform->set_rotation(game_camera_transform->rotation);
-            // float camera_follow_speed = 3.f;
-            // game_camera_transform->position = glm::mix(
-            //     game_camera_transform->position, 
-            //     target_position, 
-            //     camera_follow_speed * dt
-            // );
-            
-            // glm::vec3 direction = glm::normalize(sphere_transform->position - game_camera_transform->position);
-            // float yaw = glm::atan(direction.x, direction.z);
-            // float pitch = glm::asin(-direction.y);
-            
-            // game_camera_transform->rotation = {pitch, yaw, 0.f};
-            // game_camera_transform->set_rotation(game_camera_transform->rotation);
-        }
         
         // Check if cube hit the sphere (collision will be handled by collision events)
         if (m_cube_charging && distance < 2.0f) {
@@ -490,25 +482,30 @@ main_scene::on_physics_update() {
         sphere_body->linear_velocity = linear_velocity;
     }
 
-    // checking if there is a controller device joystic connected
-    bool controller_connected = atlas::event::is_joystic_present(0);
+    if(game_camera->is_active) {
+        // checking if there is a controller device joystic connected
+        // You should only be able to run joystick controller during the runtime NOT editor
+        bool controller_connected = atlas::event::is_joystic_present(0);
 
-    if(controller_connected) {
-        float speed = 10.f;
-        float left_joystick_x = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_LEFT_X);
-        float left_joystick_y = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_LEFT_Y);
-        float right_joystick_x = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_RIGHT_X);
+        if(controller_connected) {
+            float speed = 10.f;
+            float left_joystick_x = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_LEFT_X);
+            float left_joystick_y = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_LEFT_Y);
+            float right_joystick_x = atlas::event::get_joystic_axis(0, GLFW_GAMEPAD_AXIS_RIGHT_X);
 
-        int button_count;
-        const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &button_count);
-        sphere_body->angular_velocity.x = left_joystick_x * 10;
-        sphere_body->angular_velocity.y = glm::sin(right_joystick_x) * 10;
+            console_log_info("Left Joystick X = {}", left_joystick_x);
 
-        if(buttons[0] == GLFW_PRESS) {
-            glm::vec3 linear_velocity = { 0.f, 10.0f, 0.f };
-            sphere_body->linear_velocity = linear_velocity;
-            sphere_body->cumulative_force += 10.f;
+            int button_count;
+            const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &button_count);
+            sphere_body->angular_velocity.x = left_joystick_x * 10;
+            sphere_body->angular_velocity.y = glm::sin(right_joystick_x) * 10;
+
+            if(buttons[0] == GLFW_PRESS) {
+                glm::vec3 linear_velocity = { 0.f, 10.0f, 0.f };
+                sphere_body->linear_velocity = linear_velocity;
+                sphere_body->force += 10.f;
+            }
+
         }
-
     }
 }

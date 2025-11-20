@@ -28,9 +28,9 @@ class StarterConanRecipe(ConanFile):
         self.requires("imguidocking/2.0")
         self.requires("joltphysics/5.2.0")
         self.requires("vulkan-headers/1.3.290.0")
-        self.requires("vulkan-cpp/1.0")
+        self.requires("vulkan-cpp/2.0")
         self.requires("glm/1.0.1")
-        self.requires("atlas/0.2")
+        self.requires("atlas/0.3")
         self.requires("miniaudio/1.0")
 
     def build(self):

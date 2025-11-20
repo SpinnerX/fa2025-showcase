@@ -46,6 +46,8 @@ public:
 
     void collision_persisted(atlas::event::collision_persisted& p_event);
 
+    void collision_removed(atlas::event::collision_exit& p_event);
+
 
 private:
     // TODO: Will implement scene management system to coordinate with physics system
@@ -91,9 +93,10 @@ private:
     editor_panel m_panels;
     // sound_test m_play_sound;
     ma_engine m_audio_engine;
-    // std::thread m_audio_thread;
-    // std::mutex m_audio_mutex;
-    // std::atomic<bool> m_is_audio_playing=false;
+    std::thread m_audio_thread;
+    std::mutex m_audio_mutex;
+    std::atomic<bool> m_is_audio_playing=false;
+    std::atomic<bool> m_stop_audio_thread=false;
 
     bool m_blink_text=false;
     glm::vec3 m_offset_from_camera;
